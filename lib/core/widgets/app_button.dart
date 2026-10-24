@@ -105,6 +105,11 @@ class AppButton extends StatelessWidget {
       button = Semantics(label: semanticLabel, button: true, child: button);
     }
 
+    // Ensure full width when requested
+    if (fullWidth) {
+      return SizedBox(width: double.infinity, child: button);
+    }
+
     return button;
   }
 

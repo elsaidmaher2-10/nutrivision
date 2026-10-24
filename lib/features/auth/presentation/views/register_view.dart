@@ -1,318 +1,344 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../../app/router/route_names.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/constants/app_sizes.dart';
-import '../../../../../core/constants/app_strings.dart';
-import '../../../../../core/constants/app_text_styles.dart';
-import '../../../../../core/widgets/app_button.dart';
-import '../../../../../core/widgets/app_scaffold.dart';
-import '../../../../../core/widgets/app_text_field.dart';
-import '../viewmodels/register_viewmodel.dart';
 
-class RegisterView extends StatelessWidget {
+/// Register Screen designed from NutriVision Stitch export (nutrivision_7)
+class RegisterView extends StatefulWidget {
   const RegisterView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<RegisterViewModel>(
-      create: (_) => RegisterViewModel(),
-      child: const _RegisterViewContent(),
-    );
-  }
+  State<RegisterView> createState() => _RegisterViewState();
 }
 
-class _RegisterViewContent extends StatefulWidget {
-  const _RegisterViewContent();
+class _RegisterViewState extends State<RegisterView> {
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _agreeTerms = true;
 
   @override
-  State<_RegisterViewContent> createState() => _RegisterViewContentState();
-}
-
-class _RegisterViewContentState extends State<_RegisterViewContent> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<RegisterViewModel>().addListener(_onViewModelChanged);
-    });
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
-  void _onViewModelChanged() {
-    final viewModel = context.read<RegisterViewModel>();
+  void _onRegister() {
+    context.go(RouteNames.home);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<RegisterViewModel>(
-      builder: (context, viewModel, child) {
-        return AppAuthScaffold(
-          backgroundColor: AppColors.surfaceLight,
-          body: Form(
-            key: viewModel.formKey,
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Header
-                  _buildHeader(context),
-
-                  SizedBox(height: AppSizes.spacingXl),
-
-                  // Register form
-                  _buildRegisterForm(context, viewModel),
-
-                  SizedBox(height: AppSizes.spacingXl),
-
-                  // Footer
-                  _buildFooter(context, viewModel),
-                ],
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.onSurface),
+          onPressed: () => context.pop(),
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const _RegisterHeader(),
+              const SizedBox(height: 28),
+              _TextInputField(
+                label: 'الاسم بالكامل',
+                hint: 'مثال: سارة أحمد',
+                icon: Icons.person_outline_rounded,
+                controller: _nameController,
               ),
-            ),
+              const SizedBox(height: 16),
+              _TextInputField(
+                label: 'البريد الإلكتروني',
+                hint: 'example@domain.com',
+                icon: Icons.email_outlined,
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+              ),
+              const SizedBox(height: 16),
+              _PasswordInputField(
+                controller: _passwordController,
+                obscurePassword: _obscurePassword,
+                onToggleVisibility: () {
+                  setState(() => _obscurePassword = !_obscurePassword);
+                },
+              ),
+              const SizedBox(height: 16),
+              _TermsCheckboxRow(
+                agreeTerms: _agreeTerms,
+                onChanged: (val) => setState(() => _agreeTerms = val ?? false),
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _agreeTerms ? _onRegister : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.onPrimary,
+                    elevation: 4,
+                    shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    'إنشاء حساب جديد',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              _LoginPromptRow(
+                onLogin: () => context.pop(),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
+}
 
-  Widget _buildHeader(BuildContext context) {
+class _RegisterHeader extends StatelessWidget {
+  const _RegisterHeader();
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Back button
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: IconButton(
-            onPressed: () => context.pop(),
-            icon: Icon(
-              Icons.arrow_back_ios_new,
-              size: AppSizes.iconMd,
-              color: AppColors.textSecondary,
-            ),
-            tooltip: 'رجوع',
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.softMint,
+          ),
+          child: const Icon(Icons.person_add_alt_1_outlined, color: AppColors.primary, size: 28),
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          'إنشاء حساب جديد',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+            color: AppColors.onSurface,
           ),
         ),
-
-        SizedBox(height: AppSizes.spacingMd),
-
-        // Title
-        Text(
-          AppStrings.registerTitle,
-          style: AppTextStyles.heading1.copyWith(
-            color: AppColors.textPrimary,
-          ),
-          textAlign: TextAlign.center,
-        ),
-
-        SizedBox(height: AppSizes.spacingMd),
-
-        // Subtitle
-        Text(
-          AppStrings.registerSubtitle,
-          style: AppTextStyles.bodyMedium.copyWith(
+        const SizedBox(height: 8),
+        const Text(
+          'انضم إلى مجتمع NutriVision واستمتع بتجربة تغذية ذكية وصحية.',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 14,
             color: AppColors.textSecondary,
             height: 1.5,
           ),
-          textAlign: TextAlign.center,
         ),
       ],
     );
   }
+}
 
-  Widget _buildRegisterForm(BuildContext context, RegisterViewModel viewModel) {
+class _TextInputField extends StatelessWidget {
+  const _TextInputField({
+    required this.label,
+    required this.hint,
+    required this.icon,
+    required this.controller,
+    this.keyboardType,
+  });
+
+  final String label;
+  final String hint;
+  final IconData icon;
+  final TextEditingController controller;
+  final TextInputType? keyboardType;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Name field
-        AppTextField(
-          controller: viewModel.nameController,
-          label: AppStrings.registerNameLabel,
-          hint: AppStrings.registerNameHint,
-          keyboardType: TextInputType.name,
-          textInputAction: TextInputAction.next,
-          prefixIcon: Icon(Icons.person_outline, size: AppSizes.iconMd, color: AppColors.textSecondary),
-          validator: viewModel.validateName,
-          autofillHints: const [AutofillHints.name],
+        Text(
+          label,
+          style: const TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: AppColors.onSurface,
+          ),
         ),
-
-        SizedBox(height: AppSizes.spacingLg),
-
-        // Email field
-        AppTextField(
-          controller: viewModel.emailController,
-          label: AppStrings.registerEmailLabel,
-          hint: AppStrings.registerEmailHint,
-          keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.next,
-          prefixIcon: Icon(Icons.email_outlined, size: AppSizes.iconMd, color: AppColors.textSecondary),
-          validator: viewModel.validateEmail,
-          autofillHints: const [AutofillHints.email],
-        ),
-
-        SizedBox(height: AppSizes.spacingLg),
-
-        // Password field
-        AppTextField(
-          controller: viewModel.passwordController,
-          label: AppStrings.registerPasswordLabel,
-          hint: AppStrings.registerPasswordHint,
-          obscureText: viewModel.obscurePassword,
-          textInputAction: TextInputAction.next,
-          prefixIcon: Icon(Icons.lock_outline, size: AppSizes.iconMd, color: AppColors.textSecondary),
-          validator: viewModel.validatePassword,
-          autofillHints: const [AutofillHints.newPassword],
-        ),
-
-        SizedBox(height: AppSizes.spacingLg),
-
-        // Confirm password field
-        AppTextField(
-          controller: viewModel.confirmPasswordController,
-          label: AppStrings.registerConfirmPasswordLabel,
-          hint: AppStrings.registerConfirmPasswordHint,
-          obscureText: viewModel.obscureConfirmPassword,
-          textInputAction: TextInputAction.done,
-          prefixIcon: Icon(Icons.lock_outline, size: AppSizes.iconMd, color: AppColors.textSecondary),
-          validator: viewModel.validateConfirmPassword,
-          autofillHints: const [AutofillHints.newPassword],
-          onSubmitted: (_) => _handleRegister(context, viewModel),
-        ),
-
-        SizedBox(height: AppSizes.spacingLg),
-
-        // Terms and conditions checkbox
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Checkbox(
-              value: viewModel.agreeToTerms,
-              onChanged: (value) => viewModel.setAgreeToTerms(value ?? false),
-              activeColor: AppColors.primary,
-              checkColor: AppColors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-              ),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: AppColors.outline),
+            prefixIcon: Icon(icon, color: AppColors.primary),
+            filled: true,
+            fillColor: AppColors.surfaceWhite,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(top: AppSizes.spacingXs),
-                child: RichText(
-                  text: TextSpan(
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.textSecondary,
-                      height: 1.5,
-                    ),
-                    children: [
-                      TextSpan(text: AppStrings.registerTermsPrefix),
-                      TextSpan(
-                        text: AppStrings.registerTerms,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.primaryDark,
-                          decoration: TextDecoration.underline,
-                          decorationColor: AppColors.primaryDark,
-                        ),
-                      ),
-                      TextSpan(text: AppStrings.registerAnd),
-                      TextSpan(
-                        text: AppStrings.registerPrivacy,
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.primaryDark,
-                          decoration: TextDecoration.underline,
-                          decorationColor: AppColors.primaryDark,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
-          ],
-        ),
-
-        // Error message
-        if (viewModel.error != null) ...[
-          SizedBox(height: AppSizes.spacingMd),
-          Container(
-            padding: EdgeInsets.all(AppSizes.spacingMd),
-            decoration: BoxDecoration(
-              color: AppColors.error.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-              border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.error_outline, color: AppColors.error, size: AppSizes.iconSm),
-                SizedBox(width: AppSizes.spacingSm),
-                Expanded(
-                  child: Text(
-                    viewModel.error!,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.error,
-                    ),
-                  ),
-                ),
-              ],
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
             ),
           ),
-        ],
-
-        SizedBox(height: AppSizes.spacingXl),
-
-        // Register button
-        AppButton(
-          variant: AppButtonVariant.primary,
-          label: AppStrings.registerButton,
-          onPressed: viewModel.isLoading ? null : () => _handleRegister(context, viewModel),
-          isLoading: viewModel.isLoading,
-          leadingIcon: viewModel.isLoading
-              ? null
-              : Icon(Icons.person_add, size: AppSizes.iconSm, color: AppColors.white),
         ),
       ],
     );
   }
+}
 
-  Widget _buildFooter(BuildContext context, RegisterViewModel viewModel) {
+class _PasswordInputField extends StatelessWidget {
+  const _PasswordInputField({
+    required this.controller,
+    required this.obscurePassword,
+    required this.onToggleVisibility,
+  });
+
+  final TextEditingController controller;
+  final bool obscurePassword;
+  final VoidCallback onToggleVisibility;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'كلمة المرور',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: AppColors.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          obscureText: obscurePassword,
+          decoration: InputDecoration(
+            hintText: '8 خانات على الأقل',
+            hintStyle: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: AppColors.outline),
+            prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
+            suffixIcon: IconButton(
+              icon: Icon(
+                obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                color: AppColors.outline,
+              ),
+              onPressed: onToggleVisibility,
+            ),
+            filled: true,
+            fillColor: AppColors.surfaceWhite,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TermsCheckboxRow extends StatelessWidget {
+  const _TermsCheckboxRow({
+    required this.agreeTerms,
+    required this.onChanged,
+  });
+
+  final bool agreeTerms;
+  final ValueChanged<bool?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Checkbox(
+          value: agreeTerms,
+          activeColor: AppColors.primary,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+          onChanged: onChanged,
+        ),
+        const Expanded(
+          child: Text(
+            'أوافق على شروط الخدمة وسياسة الخصوصية',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 12,
+              color: AppColors.onSurface,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LoginPromptRow extends StatelessWidget {
+  const _LoginPromptRow({required this.onLogin});
+
+  final VoidCallback onLogin;
+
+  @override
+  Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          AppStrings.registerHasAccount,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textSecondary,
-          ),
+        const Text(
+          'لديك حساب بالفعل؟ ',
+          style: TextStyle(fontFamily: 'Cairo', fontSize: 14, color: AppColors.textSecondary),
         ),
-        SizedBox(width: AppSizes.spacingXs),
-        TextButton(
-          onPressed: () => context.push(RouteNames.login),
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.primaryDark,
-            padding: EdgeInsets.zero,
-            minimumSize: Size(0, 32),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: Text(
-            AppStrings.registerLogin,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.primaryDark,
-              fontWeight: FontWeight.w600,
-              decoration: TextDecoration.underline,
-              decorationColor: AppColors.primaryDark,
+        GestureDetector(
+          onTap: onLogin,
+          child: const Text(
+            'تسجيل الدخول',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
             ),
           ),
         ),
       ],
     );
-  }
-
-  Future<void> _handleRegister(BuildContext context, RegisterViewModel viewModel) async {
-    await viewModel.register();
-
-    if (viewModel.error == null && context.mounted) {
-      context.go(RouteNames.home);
-    }
   }
 }

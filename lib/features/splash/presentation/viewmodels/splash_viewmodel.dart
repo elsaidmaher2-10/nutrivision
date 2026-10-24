@@ -30,7 +30,8 @@ class SplashViewModel extends ChangeNotifier {
 
   Future<void> _checkOnboardingStatus() async {
     final prefs = await SharedPreferences.getInstance();
-    _onboardingCompleted = prefs.getBool(AppStrings.onboardingCompletedKey) ?? false;
+    _onboardingCompleted =
+        prefs.getBool(AppStrings.onboardingCompletedKey) ?? false;
   }
 
   Future<void> _checkAuthStatus() async {

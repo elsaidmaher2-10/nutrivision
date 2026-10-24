@@ -1,371 +1,238 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
-import '../../../../../app/router/route_names.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/constants/app_sizes.dart';
-import '../../../../../core/constants/app_strings.dart';
-import '../../../../../core/constants/app_text_styles.dart';
-import '../../../../../core/widgets/app_button.dart';
-import '../../../../../core/widgets/app_scaffold.dart';
-import '../../../../../core/widgets/app_text_field.dart';
-import '../viewmodels/forgot_password_viewmodel.dart';
+import '../../../../../core/widgets/nutri_card.dart';
 
-class ForgotPasswordView extends StatelessWidget {
+/// Forgot Password screen designed from NutriVision Stitch export (nutrivision_10)
+class ForgotPasswordView extends StatefulWidget {
   const ForgotPasswordView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<ForgotPasswordViewModel>(
-      create: (_) => ForgotPasswordViewModel(),
-      child: const _ForgotPasswordViewContent(),
-    );
-  }
+  State<ForgotPasswordView> createState() => _ForgotPasswordViewState();
 }
 
-class _ForgotPasswordViewContent extends StatefulWidget {
-  const _ForgotPasswordViewContent();
+class _ForgotPasswordViewState extends State<ForgotPasswordView> {
+  final _emailController = TextEditingController();
+  bool _isSent = false;
 
   @override
-  State<_ForgotPasswordViewContent> createState() => _ForgotPasswordViewContentState();
-}
-
-class _ForgotPasswordViewContentState extends State<_ForgotPasswordViewContent> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ForgotPasswordViewModel>().addListener(_onViewModelChanged);
-    });
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
   }
 
-  void _onViewModelChanged() {
-    final viewModel = context.read<ForgotPasswordViewModel>();
+  void _onSendResetLink() {
+    if (_emailController.text.trim().isNotEmpty) {
+      setState(() => _isSent = true);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ForgotPasswordViewModel>(
-      builder: (context, viewModel, child) {
-        return AppAuthScaffold(
-          backgroundColor: AppColors.surfaceLight,
-          body: Form(
-            key: viewModel.formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header with back button
-                _buildHeader(context),
-
-                SizedBox(height: AppSizes.spacingXl),
-
-                // Hero illustration
-                _buildHeroSection(context),
-
-                SizedBox(height: AppSizes.spacing2xl),
-
-                // Content
-                _buildContent(context),
-
-                SizedBox(height: AppSizes.spacing2xl),
-
-                // Form
-                _buildForm(context, viewModel),
-
-                const Spacer(),
-
-                // Footer
-                _buildFooter(context),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Row(
-      children: [
-        // Back button
-        IconButton(
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.onSurface),
           onPressed: () => context.pop(),
-          icon: Icon(
-            Icons.arrow_back_ios_new,
-            size: AppSizes.iconMd,
+        ),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const _ForgotPasswordHeader(),
+              const SizedBox(height: 28),
+              if (_isSent)
+                const _SuccessSentBanner()
+              else ...[
+                _EmailField(controller: _emailController),
+                const SizedBox(height: 24),
+                SizedBox(
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: _onSendResetLink,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.onPrimary,
+                      elevation: 4,
+                      shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: const Text(
+                      'إرسال تعليمات الاستعادة',
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 24),
+              Center(
+                child: TextButton.icon(
+                  onPressed: () => context.pop(),
+                  icon: const Icon(Icons.arrow_back_rounded, size: 18, color: AppColors.primary),
+                  label: const Text(
+                    'العودة لتسجيل الدخول',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ForgotPasswordHeader extends StatelessWidget {
+  const _ForgotPasswordHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.softMint,
+          ),
+          child: const Icon(Icons.key_rounded, color: AppColors.primary, size: 28),
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          'استعادة كلمة المرور',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+            color: AppColors.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'أدخل بريدك الإلكتروني المسجل وسنرسل لك رابطاً لإعادة تعيين كلمة المرور بسهولة.',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 14,
             color: AppColors.textSecondary,
-          ),
-          tooltip: 'رجوع',
-        ),
-
-        // Title
-        Expanded(
-          child: Text(
-            AppStrings.forgotPasswordTitle,
-            style: AppTextStyles.titleLarge.copyWith(
-              color: AppColors.textPrimary,
-            ),
-            textAlign: TextAlign.center,
+            height: 1.5,
           ),
         ),
-
-        // Placeholder for alignment
-        SizedBox(width: 48),
       ],
     );
   }
+}
 
-  Widget _buildHeroSection(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 358 / 201.5,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.softMint,
-              AppColors.surfaceLight,
-              AppColors.warmCream,
-            ],
+class _EmailField extends StatelessWidget {
+  const _EmailField({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'البريد الإلكتروني',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: AppColors.onSurface,
           ),
-          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
         ),
-        child: Stack(
-          children: [
-            Positioned(
-              top: -40,
-              right: -40,
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                ),
-              ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          keyboardType: TextInputType.emailAddress,
+          decoration: InputDecoration(
+            hintText: 'example@domain.com',
+            hintStyle: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: AppColors.outline),
+            prefixIcon: const Icon(Icons.email_outlined, color: AppColors.primary),
+            filled: true,
+            fillColor: AppColors.surfaceWhite,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
-            Positioned(
-              bottom: -50,
-              left: -50,
-              child: Container(
-                width: 140,
-                height: 140,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.teal.withValues(alpha: 0.1),
-                ),
-              ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
-            // Lock icon with refresh
-            Center(
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.surfaceLight,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          blurRadius: 15,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.lock_outline,
-                        size: 48,
-                        color: AppColors.primary.withValues(alpha: 0.5),
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.refresh,
-                          size: 20,
-                          color: AppColors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
             ),
-          ],
+          ),
         ),
-      ),
+      ],
     );
   }
+}
 
-  Widget _buildContent(BuildContext context) {
-    return Padding(
-      padding: AppSizes.paddingHorizontalMd,
-      child: Column(
+class _SuccessSentBanner extends StatelessWidget {
+  const _SuccessSentBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return NutriCard(
+      backgroundColor: AppColors.softMint,
+      borderColor: AppColors.primary.withValues(alpha: 0.3),
+      padding: const EdgeInsets.all(20),
+      child: const Row(
         children: [
-          Text(
-            AppStrings.forgotPasswordSubtitle,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-              height: 1.6,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildForm(BuildContext context, ForgotPasswordViewModel viewModel) {
-    return Padding(
-      padding: AppSizes.paddingHorizontalMd,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Email field
-          AppTextField(
-            controller: viewModel.emailController,
-            label: AppStrings.forgotPasswordEmailLabel,
-            hint: AppStrings.forgotPasswordEmailHint,
-            keyboardType: TextInputType.emailAddress,
-            textInputAction: TextInputAction.done,
-            prefixIcon: Icon(Icons.email_outlined, size: AppSizes.iconMd, color: AppColors.textSecondary),
-            validator: viewModel.validateEmail,
-            autofillHints: const [AutofillHints.email],
-            onSubmitted: (_) => _handleSendResetLink(context, viewModel),
-          ),
-
-          SizedBox(height: AppSizes.spacingXl),
-
-          // Send button
-          AppButton(
-            variant: AppButtonVariant.primary,
-            label: AppStrings.forgotPasswordSendButton,
-            onPressed: viewModel.isLoading ? null : () => _handleSendResetLink(context, viewModel),
-            isLoading: viewModel.isLoading,
-            leadingIcon: viewModel.isLoading
-                ? null
-                : Icon(Icons.send, size: AppSizes.iconSm, color: AppColors.white),
-          ),
-
-          // Error message
-          if (viewModel.error != null) ...[
-            SizedBox(height: AppSizes.spacingMd),
-            Container(
-              padding: EdgeInsets.all(AppSizes.spacingMd),
-              decoration: BoxDecoration(
-                color: AppColors.error.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.error_outline, color: AppColors.error, size: AppSizes.iconSm),
-                  SizedBox(width: AppSizes.spacingSm),
-                  Expanded(
-                    child: Text(
-                      viewModel.error!,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.error,
-                      ),
-                    ),
+          Icon(Icons.mark_email_read_rounded, color: AppColors.primary, size: 36),
+          SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'تم إرسال التعليمات!',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.deepGreen,
                   ),
-                ],
-              ),
-            ),
-          ],
-
-          // Success message
-          if (viewModel.error == null && !viewModel.isLoading && viewModel.emailController.text.isNotEmpty) ...[
-            SizedBox(height: AppSizes.spacingMd),
-            Container(
-              padding: EdgeInsets.all(AppSizes.spacingMd),
-              decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.check_circle_outline, color: AppColors.primary, size: AppSizes.iconSm),
-                  SizedBox(width: AppSizes.spacingSm),
-                  Expanded(
-                    child: Text(
-                      'تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني',
-                      style: AppTextStyles.bodySmall.copyWith(
-                        color: AppColors.primaryDark,
-                      ),
-                    ),
+                ),
+                SizedBox(height: 4),
+                Text(
+                  'يرجى مراجعة صندوق الوارد الخاص بك والضغط على الرابط لإعادة التعيين.',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 12,
+                    color: AppColors.deepGreen,
                   ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFooter(BuildContext context) {
-    return Padding(
-      padding: AppSizes.paddingHorizontalMd,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            AppStrings.forgotPasswordBackToLogin,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-          SizedBox(width: AppSizes.spacingXs),
-          TextButton(
-            onPressed: () => context.push(RouteNames.login),
-            style: TextButton.styleFrom(
-              foregroundColor: AppColors.primaryDark,
-              padding: EdgeInsets.zero,
-              minimumSize: Size(0, 32),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: Text(
-              AppStrings.loginButton,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.primaryDark,
-                fontWeight: FontWeight.w600,
-                decoration: TextDecoration.underline,
-                decorationColor: AppColors.primaryDark,
-              ),
+                ),
+              ],
             ),
           ),
         ],
       ),
     );
-  }
-
-  Future<void> _handleSendResetLink(BuildContext context, ForgotPasswordViewModel viewModel) async {
-    await viewModel.sendResetLink();
-    // Don't navigate automatically - let user read the success message
   }
 }

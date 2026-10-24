@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'auth_viewmodel.dart';
-import '../../../../../../core/constants/app_strings.dart';
 
 class ForgotPasswordViewModel extends AuthViewModel {
   final TextEditingController emailController = TextEditingController();

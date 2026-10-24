@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_colors.dart';
 import '../constants/app_sizes.dart';
-import 'app_error_view.dart';
 
 class AppScaffold extends StatelessWidget {
   const AppScaffold({
@@ -412,20 +411,17 @@ class AppAuthScaffold extends StatelessWidget {
                   MediaQuery.of(context).padding.bottom -
                   AppSizes.spacing4xl * 2,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (logo != null) ...[
-                  Center(child: logo!),
-                  SizedBox(height: AppSizes.spacing3xl),
+            child: IntrinsicHeight(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (logo != null) ...[
+                    Center(child: logo!),
+                    SizedBox(height: AppSizes.spacing3xl),
+                  ],
+                  body,
                 ],
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    child: body,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),

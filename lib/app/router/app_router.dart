@@ -9,11 +9,16 @@ import '../../features/auth/presentation/views/login_view.dart';
 import '../../features/auth/presentation/views/register_view.dart';
 import '../../features/auth/presentation/views/forgot_password_view.dart';
 import '../../features/home/presentation/views/home_view.dart';
+import '../../features/home/presentation/views/meals_log_view.dart';
+import '../../features/scanner/presentation/views/meal_scanner_view.dart';
+import '../../features/scanner/presentation/views/meal_analysis_details_view.dart';
+import '../../features/alternatives/presentation/views/alternatives_view.dart';
+import '../../features/profile/presentation/views/profile_setup_view.dart';
 
 abstract final class AppRouter {
   static final GoRouter router = GoRouter(
     initialLocation: RouteNames.splash,
-    debugLogDiagnostics: true,
+    debugLogDiagnostics: false,
     routes: [
       // Splash screen
       GoRoute(
@@ -51,11 +56,39 @@ abstract final class AppRouter {
         builder: (context, state) => const ForgotPasswordView(),
       ),
 
-      // Main app routes (protected)
+      // Main app routes
       GoRoute(
         path: RouteNames.home,
         name: 'home',
         builder: (context, state) => const HomeView(),
+      ),
+      GoRoute(
+        path: RouteNames.scanner,
+        name: 'scanner',
+        builder: (context, state) => const MealScannerView(),
+      ),
+      GoRoute(
+        path: RouteNames.mealDetails,
+        name: 'mealDetails',
+        builder: (context, state) {
+          final mealName = state.extra as String? ?? 'طبق كشري مصري متوسط';
+          return MealAnalysisDetailsView(mealName: mealName);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.mealsLog,
+        name: 'mealsLog',
+        builder: (context, state) => const MealsLogView(),
+      ),
+      GoRoute(
+        path: RouteNames.alternatives,
+        name: 'alternatives',
+        builder: (context, state) => const AlternativesView(),
+      ),
+      GoRoute(
+        path: RouteNames.profileSetup,
+        name: 'profileSetup',
+        builder: (context, state) => const ProfileSetupView(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
@@ -69,29 +102,23 @@ abstract final class AppRouter {
               color: Theme.of(context).colorScheme.error,
             ),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'الصفحة غير موجودة',
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: TextStyle(fontFamily: 'Cairo', fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
             Text(
               state.error?.toString() ?? 'خطأ غير معروف',
-              style: Theme.of(context).textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () => context.go(RouteNames.home),
-              child: const Text('العودة للرئيسية'),
+              child: const Text('العودة للرئيسية', style: TextStyle(fontFamily: 'Cairo')),
             ),
           ],
         ),
       ),
     ),
-    redirect: (context, state) {
-      // Handle authentication redirects
-      // This will be enhanced when we add auth state management
-      return null;
-    },
   );
 }

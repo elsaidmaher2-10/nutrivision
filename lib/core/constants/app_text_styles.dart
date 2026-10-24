@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
-import 'app_sizes.dart';
 
 abstract final class AppTextStyles {
   // Arabic font - Cairo

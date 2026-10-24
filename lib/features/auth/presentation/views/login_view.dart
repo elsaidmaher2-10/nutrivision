@@ -1,346 +1,420 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../../app/router/route_names.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/constants/app_sizes.dart';
-import '../../../../../core/constants/app_strings.dart';
-import '../../../../../core/constants/app_text_styles.dart';
-import '../../../../../core/widgets/app_button.dart';
-import '../../../../../core/widgets/app_scaffold.dart';
-import '../../../../../core/widgets/app_text_field.dart';
-import '../viewmodels/login_viewmodel.dart';
+import '../../../../../core/widgets/nutri_card.dart';
 
-class LoginView extends StatelessWidget {
+/// Login Screen designed from NutriVision Stitch export (nutrivision_1)
+class LoginView extends StatefulWidget {
   const LoginView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<LoginViewModel>(
-      create: (_) => LoginViewModel(),
-      child: const _LoginViewContent(),
-    );
-  }
+  State<LoginView> createState() => _LoginViewState();
 }
 
-class _LoginViewContent extends StatefulWidget {
-  const _LoginViewContent();
+class _LoginViewState extends State<LoginView> {
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
+  bool _rememberMe = true;
 
   @override
-  State<_LoginViewContent> createState() => _LoginViewContentState();
-}
-
-class _LoginViewContentState extends State<_LoginViewContent> {
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<LoginViewModel>().addListener(_onViewModelChanged);
-    });
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
-  void _onViewModelChanged() {
-    final viewModel = context.read<LoginViewModel>();
-    // Handle navigation after successful login
-    // This would typically be done via GoRouter redirect
+  void _onLogin() {
+    context.go(RouteNames.home);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<LoginViewModel>(
-      builder: (context, viewModel, child) {
-        return AppAuthScaffold(
-          backgroundColor: AppColors.surfaceLight,
-          body: Form(
-            key: viewModel.formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header
-                _buildHeader(context),
-
-                SizedBox(height: AppSizes.spacing2xl),
-
-                // Visual banner
-                _buildVisualBanner(context),
-
-                SizedBox(height: AppSizes.spacing2xl),
-
-                // Login form
-                _buildLoginForm(context, viewModel),
-
-                SizedBox(height: AppSizes.spacingXl),
-
-                // Footer
-                _buildFooter(context, viewModel),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildHeader(BuildContext context) {
-    return Column(
-      children: [
-        // Back button
-        Align(
-          alignment: AlignmentDirectional.centerStart,
-          child: IconButton(
-            onPressed: () => context.pop(),
-            icon: Icon(
-              Icons.arrow_back_ios_new,
-              size: AppSizes.iconMd,
-              color: AppColors.textSecondary,
-            ),
-            tooltip: 'رجوع',
-          ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.onSurface),
+          onPressed: () => context.pop(),
         ),
-
-        SizedBox(height: AppSizes.spacingLg),
-
-        // Title
-        Text(
-          AppStrings.loginTitle,
-          style: AppTextStyles.heading1.copyWith(
-            color: AppColors.textPrimary,
-          ),
-          textAlign: TextAlign.center,
-        ),
-
-        SizedBox(height: AppSizes.spacingMd),
-
-        // Subtitle
-        Text(
-          AppStrings.loginSubtitle,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textSecondary,
-            height: 1.5,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildVisualBanner(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 358 / 160,
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.primary.withValues(alpha: 0.1),
-              AppColors.teal.withValues(alpha: 0.1),
-              AppColors.softMint,
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const _LoginHeader(),
+              const SizedBox(height: 32),
+              _EmailInputField(controller: _emailController),
+              const SizedBox(height: 18),
+              _PasswordInputField(
+                controller: _passwordController,
+                obscurePassword: _obscurePassword,
+                onToggleVisibility: () {
+                  setState(() => _obscurePassword = !_obscurePassword);
+                },
+              ),
+              const SizedBox(height: 14),
+              _RememberAndForgotRow(
+                rememberMe: _rememberMe,
+                onRememberChanged: (val) {
+                  setState(() => _rememberMe = val ?? false);
+                },
+                onForgotPassword: () {
+                  context.push(RouteNames.forgotPassword);
+                },
+              ),
+              const SizedBox(height: 28),
+              SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _onLogin,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.onPrimary,
+                    elevation: 4,
+                    shadowColor: AppColors.primary.withValues(alpha: 0.3),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    'تسجيل الدخول',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+              const _OrDivider(),
+              const SizedBox(height: 24),
+              const _SocialLoginRow(),
+              const SizedBox(height: 32),
+              _RegisterPromptRow(
+                onRegister: () => context.push(RouteNames.register),
+              ),
             ],
           ),
-          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-        ),
-        child: Stack(
-          children: [
-            Positioned(
-              top: -60,
-              right: -60,
-              child: Container(
-                width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -80,
-              left: -80,
-              child: Container(
-                width: 180,
-                height: 180,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.teal.withValues(alpha: 0.1),
-                ),
-              ),
-            ),
-            Center(
-              child: Icon(
-                Icons.eco_outlined,
-                size: 80,
-                color: AppColors.primary.withValues(alpha: 0.3),
-              ),
-            ),
-          ],
         ),
       ),
     );
   }
+}
 
-  Widget _buildLoginForm(BuildContext context, LoginViewModel viewModel) {
+class _LoginHeader extends StatelessWidget {
+  const _LoginHeader();
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Email field
-        AppTextField(
-          controller: viewModel.emailController,
-          label: AppStrings.loginEmailLabel,
-          hint: AppStrings.loginEmailHint,
+        Container(
+          width: 52,
+          height: 52,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.softMint,
+          ),
+          child: const Icon(Icons.lock_outline_rounded, color: AppColors.primary, size: 28),
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          'تسجيل الدخول',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+            color: AppColors.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'مرحباً بعودتك! تابع رحلتك نحو صحة أفضل وتغذية متوازنة.',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 14,
+            color: AppColors.textSecondary,
+            height: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _EmailInputField extends StatelessWidget {
+  const _EmailInputField({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'البريد الإلكتروني',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: AppColors.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
           keyboardType: TextInputType.emailAddress,
-          textInputAction: TextInputAction.next,
-          prefixIcon: Icon(Icons.email_outlined, size: AppSizes.iconMd, color: AppColors.textSecondary),
-          validator: viewModel.validateEmail,
-          autofillHints: const [AutofillHints.email],
-        ),
-
-        SizedBox(height: AppSizes.spacingLg),
-
-        // Password field
-        AppTextField(
-          controller: viewModel.passwordController,
-          label: AppStrings.loginPasswordLabel,
-          hint: AppStrings.loginPasswordHint,
-          obscureText: viewModel.obscurePassword,
-          textInputAction: TextInputAction.done,
-          prefixIcon: Icon(Icons.lock_outline, size: AppSizes.iconMd, color: AppColors.textSecondary),
-          validator: viewModel.validatePassword,
-          autofillHints: const [AutofillHints.password],
-          onSubmitted: (_) => _handleLogin(context, viewModel),
-        ),
-
-        SizedBox(height: AppSizes.spacingMd),
-
-        // Forgot password and Remember me
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Remember me checkbox
-            Row(
-              children: [
-                Checkbox(
-                  value: viewModel.rememberMe,
-                  onChanged: (value) => viewModel.setRememberMe(value ?? false),
-                  activeColor: AppColors.primary,
-                  checkColor: AppColors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppSizes.radiusSm),
-                  ),
-                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                Text(
-                  AppStrings.loginRememberMe,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
+          decoration: InputDecoration(
+            hintText: 'example@domain.com',
+            hintStyle: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: AppColors.outline),
+            prefixIcon: const Icon(Icons.email_outlined, color: AppColors.primary),
+            filled: true,
+            fillColor: AppColors.surfaceWhite,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.border),
             ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
 
-            // Forgot password link
-            TextButton(
-              onPressed: () => context.push(RouteNames.forgotPassword),
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.primaryDark,
-                padding: EdgeInsets.zero,
-                minimumSize: Size(0, 32),
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+class _PasswordInputField extends StatelessWidget {
+  const _PasswordInputField({
+    required this.controller,
+    required this.obscurePassword,
+    required this.onToggleVisibility,
+  });
+
+  final TextEditingController controller;
+  final bool obscurePassword;
+  final VoidCallback onToggleVisibility;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'كلمة المرور',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 13,
+            fontWeight: FontWeight.bold,
+            color: AppColors.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: controller,
+          obscureText: obscurePassword,
+          decoration: InputDecoration(
+            hintText: '••••••••',
+            hintStyle: const TextStyle(fontFamily: 'Cairo', fontSize: 13, color: AppColors.outline),
+            prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
+            suffixIcon: IconButton(
+              icon: Icon(
+                obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                color: AppColors.outline,
               ),
-              child: Text(
-                AppStrings.loginForgotPassword,
-                style: AppTextStyles.linkText.copyWith(
-                  decoration: TextDecoration.underline,
-                  decorationColor: AppColors.primaryDark,
-                ),
+              onPressed: onToggleVisibility,
+            ),
+            filled: true,
+            fillColor: AppColors.surfaceWhite,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RememberAndForgotRow extends StatelessWidget {
+  const _RememberAndForgotRow({
+    required this.rememberMe,
+    required this.onRememberChanged,
+    required this.onForgotPassword,
+  });
+
+  final bool rememberMe;
+  final ValueChanged<bool?> onRememberChanged;
+  final VoidCallback onForgotPassword;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Row(
+          children: [
+            Checkbox(
+              value: rememberMe,
+              activeColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+              onChanged: onRememberChanged,
+            ),
+            const Text(
+              'تذكرني',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 13,
+                color: AppColors.onSurface,
               ),
             ),
           ],
         ),
-
-        // Error message
-        if (viewModel.error != null) ...[
-          SizedBox(height: AppSizes.spacingMd),
-          Container(
-            padding: EdgeInsets.all(AppSizes.spacingMd),
-            decoration: BoxDecoration(
-              color: AppColors.error.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppSizes.radiusMd),
-              border: Border.all(color: AppColors.error.withValues(alpha: 0.3)),
+        TextButton(
+          onPressed: onForgotPassword,
+          child: const Text(
+            'نسيت كلمة المرور؟',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
             ),
-            child: Row(
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _OrDivider extends StatelessWidget {
+  const _OrDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Expanded(child: Divider(color: AppColors.border)),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'أو المتابعة عبر',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 12,
+              color: AppColors.textSecondary,
+            ),
+          ),
+        ),
+        Expanded(child: Divider(color: AppColors.border)),
+      ],
+    );
+  }
+}
+
+class _SocialLoginRow extends StatelessWidget {
+  const _SocialLoginRow();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: NutriCard(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {},
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, color: AppColors.error, size: AppSizes.iconSm),
-                SizedBox(width: AppSizes.spacingSm),
-                Expanded(
-                  child: Text(
-                    viewModel.error!,
-                    style: AppTextStyles.bodySmall.copyWith(
-                      color: AppColors.error,
-                    ),
-                  ),
+                Icon(Icons.g_mobiledata_rounded, size: 28, color: Colors.red),
+                SizedBox(width: 8),
+                Text(
+                  'Google',
+                  style: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.bold),
                 ),
               ],
             ),
           ),
-        ],
-
-        SizedBox(height: AppSizes.spacingXl),
-
-        // Login button
-        AppButton(
-          variant: AppButtonVariant.primary,
-          label: AppStrings.loginButton,
-          onPressed: viewModel.isLoading ? null : () => _handleLogin(context, viewModel),
-          isLoading: viewModel.isLoading,
-          leadingIcon: viewModel.isLoading
-              ? null
-              : Icon(Icons.login, size: AppSizes.iconSm, color: AppColors.white),
         ),
-      ],
-    );
-  }
-
-  Widget _buildFooter(BuildContext context, LoginViewModel viewModel) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          AppStrings.loginNoAccount,
-          style: AppTextStyles.bodyMedium.copyWith(
-            color: AppColors.textSecondary,
-          ),
-        ),
-        SizedBox(width: AppSizes.spacingXs),
-        TextButton(
-          onPressed: () => context.push(RouteNames.register),
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.primaryDark,
-            padding: EdgeInsets.zero,
-            minimumSize: Size(0, 32),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          child: Text(
-            AppStrings.loginSignUp,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.primaryDark,
-              fontWeight: FontWeight.w600,
-              decoration: TextDecoration.underline,
-              decorationColor: AppColors.primaryDark,
+        const SizedBox(width: 14),
+        Expanded(
+          child: NutriCard(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {},
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.apple_rounded, size: 24, color: Colors.black),
+                SizedBox(width: 8),
+                Text(
+                  'Apple',
+                  style: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.bold),
+                ),
+              ],
             ),
           ),
         ),
       ],
     );
   }
+}
 
-  Future<void> _handleLogin(BuildContext context, LoginViewModel viewModel) async {
-    await viewModel.login();
+class _RegisterPromptRow extends StatelessWidget {
+  const _RegisterPromptRow({required this.onRegister});
 
-    if (viewModel.error == null && context.mounted) {
-      // Navigate to home after successful login
-      context.go(RouteNames.home);
-    }
+  final VoidCallback onRegister;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          'ليس لديك حساب بعد؟ ',
+          style: TextStyle(fontFamily: 'Cairo', fontSize: 14, color: AppColors.textSecondary),
+        ),
+        GestureDetector(
+          onTap: onRegister,
+          child: const Text(
+            'إنشاء حساب جديد',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

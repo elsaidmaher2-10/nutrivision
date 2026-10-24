@@ -19,58 +19,67 @@ class OnboardingPageView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: AppSizes.screenPadding,
-      child: Column(
-        children: [
-          SizedBox(height: AppSizes.spacing2xl),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: constraints.maxHeight),
+            child: IntrinsicHeight(
+              child: Padding(
+                padding: AppSizes.screenPadding,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Top spacer and illustration
+                    Column(
+                      children: [
+                        SizedBox(height: AppSizes.spacing2xl),
+                        _buildIllustration(context),
+                      ],
+                    ),
 
-          // Illustration area
-          Expanded(
-            flex: 3,
-            child: Center(
-              child: _buildIllustration(context),
+                    // Content area (centered vertically when there's space)
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(height: AppSizes.spacing3xl),
+
+                        // Title
+                        Text(
+                          pageData.title,
+                          style: AppTextStyles.heading1.copyWith(
+                            color: AppColors.textPrimary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+
+                        SizedBox(height: AppSizes.spacingLg),
+
+                        // Description
+                        Text(
+                          pageData.description,
+                          style: AppTextStyles.subtitle.copyWith(
+                            color: AppColors.textSecondary,
+                            height: 1.6,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+
+                        SizedBox(height: AppSizes.spacing3xl),
+
+                        // Feature highlight
+                        _buildFeatureHighlight(context),
+
+                        SizedBox(height: AppSizes.spacing3xl),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
-
-          SizedBox(height: AppSizes.spacing3xl),
-
-          // Content area
-          Expanded(
-            flex: 2,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // Title
-                Text(
-                  pageData.title,
-                  style: AppTextStyles.heading1.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-                SizedBox(height: AppSizes.spacingLg),
-
-                // Description
-                Text(
-                  pageData.description,
-                  style: AppTextStyles.subtitle.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.6,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-
-                SizedBox(height: AppSizes.spacing3xl),
-
-                // Feature highlight
-                _buildFeatureHighlight(context),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -128,9 +137,7 @@ class OnboardingPageView extends StatelessWidget {
             ),
           ),
           // Main illustration icon
-          Center(
-            child: _getIllustrationIcon(),
-          ),
+          Center(child: _getIllustrationIcon()),
           // Floating badge
           Positioned(
             top: AppSizes.spacingLg,
@@ -234,9 +241,7 @@ class OnboardingPageView extends StatelessWidget {
               color: _getFeatureColor().withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(AppSizes.radiusFull),
             ),
-            child: Center(
-              child: _getFeatureIcon(),
-            ),
+            child: Center(child: _getFeatureIcon()),
           ),
           SizedBox(width: AppSizes.spacingLg),
           Expanded(
@@ -280,11 +285,23 @@ class OnboardingPageView extends StatelessWidget {
   Widget _getFeatureIcon() {
     switch (index) {
       case 0:
-        return Icon(Icons.restaurant_menu, color: AppColors.primary, size: AppSizes.iconLg);
+        return Icon(
+          Icons.restaurant_menu,
+          color: AppColors.primary,
+          size: AppSizes.iconLg,
+        );
       case 1:
-        return Icon(Icons.camera_alt, color: AppColors.teal, size: AppSizes.iconLg);
+        return Icon(
+          Icons.camera_alt,
+          color: AppColors.teal,
+          size: AppSizes.iconLg,
+        );
       case 2:
-        return Icon(Icons.track_changes, color: AppColors.orange, size: AppSizes.iconLg);
+        return Icon(
+          Icons.track_changes,
+          color: AppColors.orange,
+          size: AppSizes.iconLg,
+        );
       default:
         return Icon(Icons.eco, color: AppColors.primary, size: AppSizes.iconLg);
     }

@@ -1,374 +1,710 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../app/router/route_names.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/constants/app_sizes.dart';
-import '../../../../../core/constants/app_strings.dart';
-import '../../../../../core/constants/app_text_styles.dart';
-import '../../../../../core/widgets/app_button.dart';
-import '../../../../../core/widgets/app_logo.dart';
-import '../../../../../core/widgets/app_scaffold.dart';
+import '../../../../../core/widgets/calorie_progress_ring.dart';
+import '../../../../../core/widgets/macro_progress_bar.dart';
+import '../../../../../core/widgets/nutri_card.dart';
 
-class HomeView extends StatelessWidget {
+/// Main Home Dashboard designed from NutriVision Stitch export (nutrivision_9)
+class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
   @override
+  State<HomeView> createState() => _HomeViewState();
+}
+
+class _HomeViewState extends State<HomeView> {
+  int _selectedTabIndex = 0;
+
+  void _onTabSelected(int index) {
+    if (index == 2) {
+      // Middle scanner button
+      context.push('/scanner');
+      return;
+    }
+    setState(() => _selectedTabIndex = index);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return AppScaffold(
-      backgroundColor: AppColors.surfaceLight,
-      appBar: AppBar(
-        title: Text(
-          AppStrings.homeTitle,
-          style: AppTextStyles.titleLarge.copyWith(
-            color: AppColors.textPrimary,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        actions: [
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.notifications_outlined,
-              size: AppSizes.iconMd,
-              color: AppColors.textPrimary,
-            ),
-            tooltip: 'الإشعارات',
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.settings_outlined,
-              size: AppSizes.iconMd,
-              color: AppColors.textPrimary,
-            ),
-            tooltip: 'الإعدادات',
-          ),
-        ],
-      ),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: const _HomeAppBar(),
       body: SafeArea(
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: AppSizes.screenPadding,
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Welcome section
-              _buildWelcomeSection(context),
+              // Greeting Section
+              const _HomeGreetingSection(),
 
-              SizedBox(height: AppSizes.spacing3xl),
+              const SizedBox(height: 20),
 
-              // Quick stats placeholder
-              _buildQuickStats(context),
+              // AI Meal Logger Hero Card
+              _AiMealLoggerHeroCard(
+                onStartScan: () => context.push('/scanner'),
+              ),
 
-              SizedBox(height: AppSizes.spacing3xl),
+              const SizedBox(height: 20),
 
-              // Quick actions
-              _buildQuickActions(context),
+              // Daily Calorie Progress Card
+              const _DailyCalorieProgressCard(),
 
-              SizedBox(height: AppSizes.spacing3xl),
+              const SizedBox(height: 24),
 
-              // Placeholder notice
-              _buildPlaceholderNotice(context),
+              // Today's Meals Timeline
+              _TodayMealsSection(
+                onMealTap: (mealName) {
+                  context.push('/meal-details', extra: mealName);
+                },
+              ),
+
+              const SizedBox(height: 80), // bottom bar spacing
             ],
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(context),
+      bottomNavigationBar: _HomeBottomNavBar(
+        currentIndex: _selectedTabIndex,
+        onTap: _onTabSelected,
+      ),
     );
   }
+}
 
-  Widget _buildWelcomeSection(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(AppSizes.spacingXl),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topRight,
-          end: Alignment.bottomLeft,
-          colors: [
-            AppColors.primary,
-            AppColors.deepGreen,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-            spreadRadius: -4,
+class _HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _HomeAppBar();
+
+  @override
+  Size get preferredSize => const Size.fromHeight(64);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: AppColors.background.withValues(alpha: 0.95),
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      title: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppColors.primary,
+            ),
+            child: const Icon(Icons.restaurant, color: Colors.white, size: 20),
+          ),
+          const SizedBox(width: 10),
+          const Text(
+            'NutriVision',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 20,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
+            ),
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Expanded(
+      actions: [
+        IconButton(
+          onPressed: () {},
+          icon: const Icon(Icons.notifications_none_rounded, color: AppColors.onSurfaceVariant),
+          tooltip: 'الإشعارات',
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: GestureDetector(
+            onTap: () => context.push('/profile-setup'),
+            child: const CircleAvatar(
+              radius: 18,
+              backgroundColor: AppColors.primary,
+              child: Icon(Icons.person, color: Colors.white, size: 20),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HomeGreetingSection extends StatelessWidget {
+  const _HomeGreetingSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'أهلاً بك، سارة! 🌿',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: AppColors.onSurface,
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              'خطوة أصغر كل يوم تصنع فارقاً كبيراً في صحتك.',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 13,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: AppColors.surfaceContainerHigh,
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0D000000),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: const Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(Icons.local_florist_rounded, color: AppColors.primary, size: 24),
+              Positioned(
+                top: 4,
+                right: 4,
+                child: CircleAvatar(
+                  radius: 5,
+                  backgroundColor: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _AiMealLoggerHeroCard extends StatelessWidget {
+  const _AiMealLoggerHeroCard({required this.onStartScan});
+
+  final VoidCallback onStartScan;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF21865B),
+            Color(0xFF15563D),
+          ],
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x2621865B), // 0 4px 20px rgba(33,134,91,0.15)
+            blurRadius: 20,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: onStartScan,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'مرحباً بك في',
-                  style: AppTextStyles.titleMedium.copyWith(
-                    color: AppColors.white.withValues(alpha: 0.9),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(9999),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.auto_awesome, color: Colors.white, size: 14),
+                      SizedBox(width: 6),
+                      Text(
+                        'التحليل الذكي بالرؤية الحاسوبية',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: AppSizes.spacingXs),
-                Text(
-                  AppStrings.appName,
-                  style: AppTextStyles.headlineMedium.copyWith(
-                    color: AppColors.white,
-                    fontWeight: FontWeight.w700,
+                const SizedBox(height: 14),
+                const Text(
+                  'أضف وجبة جديدة بالذكاء الاصطناعي 📸✨',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
                   ),
                 ),
-                SizedBox(height: AppSizes.spacingMd),
+                const SizedBox(height: 6),
                 Text(
-                  'مساعدك الذكي للتغذية والصحة',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.white.withValues(alpha: 0.8),
+                  'التقط صورة لطبقك ودع الذكاء الاصطناعي يحسب السعرات والعناصر الغذائية فوراً.',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 13,
+                    color: Colors.white.withValues(alpha: 0.9),
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'ابدأ التصوير الآن',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                      SizedBox(width: 8),
+                      Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.primary),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
-          AppLogoSmall(size: AppSizes.logoLg, color: AppColors.white),
+        ),
+      ),
+    );
+  }
+}
+
+class _DailyCalorieProgressCard extends StatelessWidget {
+  const _DailyCalorieProgressCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return NutriCard(
+      padding: const EdgeInsets.all(20),
+      borderRadius: BorderRadius.circular(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 36,
+                    height: 36,
+                    decoration: BoxDecoration(
+                      color: AppColors.softMint,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.local_fire_department_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'السعرات الحرارية اليومية',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.onSurface,
+                    ),
+                  ),
+                ],
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.softMint,
+                  borderRadius: BorderRadius.circular(9999),
+                ),
+                child: const Text(
+                  'المتبقي 550',
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '1,450',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.onSurface,
+                    ),
+                  ),
+                  Text(
+                    'من أصل 2,000 سعرة حرارية مستهدفة',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+              CalorieProgressRing(
+                consumedCalories: 1450,
+                targetCalories: 2000,
+                size: 78,
+                strokeWidth: 8,
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          const Divider(color: AppColors.surfaceContainer, height: 1),
+          const SizedBox(height: 16),
+          const Row(
+            children: [
+              Expanded(
+                child: MacroProgressBar(
+                  label: 'بروتين',
+                  currentGrams: 85,
+                  targetGrams: 120,
+                  color: AppColors.primary,
+                ),
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: MacroProgressBar(
+                  label: 'كارب',
+                  currentGrams: 160,
+                  targetGrams: 210,
+                  color: AppColors.teal,
+                ),
+              ),
+              SizedBox(width: 16),
+              Expanded(
+                child: MacroProgressBar(
+                  label: 'دهون',
+                  currentGrams: 45,
+                  targetGrams: 65,
+                  color: AppColors.orange,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildQuickStats(BuildContext context) {
+class _TodayMealsSection extends StatelessWidget {
+  const _TodayMealsSection({required this.onMealTap});
+
+  final ValueChanged<String> onMealTap;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'ملخص اليوم',
-          style: AppTextStyles.titleLarge.copyWith(
-            color: AppColors.textPrimary,
-          ),
-        ),
-        SizedBox(height: AppSizes.spacingLg),
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildStatCard(
-              context,
-              title: 'السعرات',
-              value: '0',
-              unit: 'كcal',
-              icon: Icons.local_fire_department,
-              iconColor: AppColors.orange,
-              backgroundColor: AppColors.orange.withValues(alpha: 0.1),
+            const Text(
+              'وجبات اليوم',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.onSurface,
+              ),
             ),
-            SizedBox(width: AppSizes.spacingMd),
-            _buildStatCard(
-              context,
-              title: 'البروتين',
-              value: '0',
-              unit: 'جم',
-              icon: Icons.fitness_center,
-              iconColor: AppColors.primary,
-              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-            ),
-            SizedBox(width: AppSizes.spacingMd),
-            _buildStatCard(
-              context,
-              title: 'الكربوهيدرات',
-              value: '0',
-              unit: 'جم',
-              icon: Icons.grain,
-              iconColor: AppColors.teal,
-              backgroundColor: AppColors.teal.withValues(alpha: 0.1),
+            TextButton(
+              onPressed: () => context.push('/meals-log'),
+              child: const Text(
+                'عرض السجل',
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
             ),
           ],
+        ),
+        const SizedBox(height: 12),
+        _MealCardItem(
+          category: 'فطور',
+          title: 'بيض مسلوق + خبز بلدي + جبنة قريش',
+          calories: 380,
+          time: '8:30 ص',
+          icon: Icons.breakfast_dining_rounded,
+          iconColor: AppColors.orange,
+          onTap: () => onMealTap('فطور'),
+        ),
+        const SizedBox(height: 10),
+        _MealCardItem(
+          category: 'غداء',
+          title: 'طبق كشري مصري متوسط مع دقوس',
+          calories: 620,
+          time: '2:15 م',
+          icon: Icons.lunch_dining_rounded,
+          iconColor: AppColors.primary,
+          highlight: true,
+          onTap: () => onMealTap('طبق كشري مصري متوسط'),
+        ),
+        const SizedBox(height: 10),
+        _MealCardItem(
+          category: 'سناك',
+          title: 'تفاحة خضراء وحفنة مكسرات نيئة',
+          calories: 170,
+          time: '5:00 م',
+          icon: Icons.coffee_rounded,
+          iconColor: AppColors.teal,
+          onTap: () => onMealTap('سناك'),
+        ),
+        const SizedBox(height: 10),
+        _MealCardItem(
+          category: 'عشاء',
+          title: 'سلطة خضراء مع تونة وزيت زيتون',
+          calories: 280,
+          time: '8:45 م',
+          icon: Icons.dinner_dining_rounded,
+          iconColor: AppColors.deepGreen,
+          onTap: () => onMealTap('عشاء'),
         ),
       ],
     );
   }
+}
 
-  Widget _buildStatCard(
-    BuildContext context, {
-    required String title,
-    required String value,
-    required String unit,
-    required IconData icon,
-    required Color iconColor,
-    required Color backgroundColor,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.all(AppSizes.spacingLg),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-          border: Border.all(color: AppColors.border),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.textPrimary.withValues(alpha: 0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: backgroundColor,
-                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-              ),
-              child: Center(
-                child: Icon(icon, color: iconColor, size: AppSizes.iconLg),
-              ),
-            ),
-            SizedBox(height: AppSizes.spacingMd),
-            Text(
-              value,
-              style: AppTextStyles.headlineMedium.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            Text(
-              unit,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-            SizedBox(height: AppSizes.spacingXs),
-            Text(
-              title,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+class _MealCardItem extends StatelessWidget {
+  const _MealCardItem({
+    required this.category,
+    required this.title,
+    required this.calories,
+    required this.time,
+    required this.icon,
+    required this.iconColor,
+    required this.onTap,
+    this.highlight = false,
+  });
 
-  Widget _buildQuickActions(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'إجراءات سريعة',
-          style: AppTextStyles.titleLarge.copyWith(
-            color: AppColors.textPrimary,
+  final String category;
+  final String title;
+  final int calories;
+  final String time;
+  final IconData icon;
+  final Color iconColor;
+  final VoidCallback onTap;
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    return NutriCard(
+      padding: const EdgeInsets.all(14),
+      borderRadius: BorderRadius.circular(16),
+      borderColor: highlight ? AppColors.primary.withValues(alpha: 0.3) : null,
+      onTap: onTap,
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, color: iconColor, size: 22),
           ),
-        ),
-        SizedBox(height: AppSizes.spacingLg),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: AppSizes.spacingMd,
-          crossAxisSpacing: AppSizes.spacingMd,
-          childAspectRatio: 1.1,
-          children: [
-            _buildActionCard(
-              context,
-              title: 'تحليل وجبة',
-              subtitle: 'تصوير وتحليل',
-              icon: Icons.camera_alt_outlined,
-              iconColor: AppColors.primary,
-              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-              onTap: () {},
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceContainer,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        category,
+                        style: const TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.onSurfaceVariant,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      time,
+                      style: const TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.onSurface,
+                  ),
+                ),
+              ],
             ),
-            _buildActionCard(
-              context,
-              title: 'إضافة وجبة',
-              subtitle: 'تسجيل يدوي',
-              icon: Icons.add_circle_outline,
-              iconColor: AppColors.teal,
-              backgroundColor: AppColors.teal.withValues(alpha: 0.1),
-              onTap: () {},
-            ),
-            _buildActionCard(
-              context,
-              title: 'الوصفات',
-              subtitle: 'أطباق صحية',
-              icon: Icons.menu_book_outlined,
-              iconColor: AppColors.orange,
-              backgroundColor: AppColors.orange.withValues(alpha: 0.1),
-              onTap: () {},
-            ),
-            _buildActionCard(
-              context,
-              title: 'الأهداف',
-              subtitle: 'تتبع التقدم',
-              icon: Icons.flag_outlined,
-              iconColor: AppColors.deepGreen,
-              backgroundColor: AppColors.deepGreen.withValues(alpha: 0.1),
-              onTap: () {},
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildActionCard(
-    BuildContext context, {
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color iconColor,
-    required Color backgroundColor,
-    required VoidCallback onTap,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-        child: Container(
-          padding: EdgeInsets.all(AppSizes.spacingLg),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-            border: Border.all(color: AppColors.border),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.textPrimary.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 2),
-              ),
-            ],
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Container(
-                width: 56,
-                height: 56,
-                decoration: BoxDecoration(
-                  color: backgroundColor,
-                  borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                ),
-                child: Center(
-                  child: Icon(icon, color: iconColor, size: AppSizes.iconXl),
+              Text(
+                '$calories',
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.primary,
                 ),
               ),
-              SizedBox(height: AppSizes.spacingMd),
-              Text(
-                title,
-                style: AppTextStyles.titleMedium.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: AppSizes.spacingXs),
-              Text(
-                subtitle,
-                style: AppTextStyles.bodySmall.copyWith(
+              const Text(
+                'سعرة',
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 11,
                   color: AppColors.textSecondary,
                 ),
-                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          const SizedBox(width: 6),
+          const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.outlineVariant),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeBottomNavBar extends StatelessWidget {
+  const _HomeBottomNavBar({
+    required this.currentIndex,
+    required this.onTap,
+  });
+
+  final int currentIndex;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surfaceWhite,
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x0F000000),
+            blurRadius: 20,
+            offset: Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _NavBarItem(
+                icon: Icons.home_rounded,
+                label: 'الرئيسية',
+                isSelected: currentIndex == 0,
+                onTap: () => onTap(0),
+              ),
+              _NavBarItem(
+                icon: Icons.local_dining_rounded,
+                label: 'وجباتي',
+                isSelected: currentIndex == 1,
+                onTap: () {
+                  onTap(1);
+                  context.push('/meals-log');
+                },
+              ),
+              _ScannerCentralButton(
+                onTap: () => onTap(2),
+              ),
+              _NavBarItem(
+                icon: Icons.eco_rounded,
+                label: 'البدائل',
+                isSelected: currentIndex == 3,
+                onTap: () {
+                  onTap(3);
+                  context.push('/alternatives');
+                },
+              ),
+              _NavBarItem(
+                icon: Icons.person_rounded,
+                label: 'حسابي',
+                isSelected: currentIndex == 4,
+                onTap: () {
+                  onTap(4);
+                  context.push('/profile-setup');
+                },
               ),
             ],
           ),
@@ -376,93 +712,80 @@ class HomeView extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildPlaceholderNotice(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(AppSizes.spacingXl),
-      decoration: BoxDecoration(
-        color: AppColors.softMint,
-        borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Icons.construction_outlined,
-            size: AppSizes.icon3xl,
-            color: AppColors.primary,
-          ),
-          SizedBox(height: AppSizes.spacingLg),
-          Text(
-            'شاشة الرئيسية قيد التطوير',
-            style: AppTextStyles.titleLarge.copyWith(
-              color: AppColors.textPrimary,
+class _NavBarItem extends StatelessWidget {
+  const _NavBarItem({
+    required this.icon,
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isSelected ? AppColors.primary : AppColors.outline;
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                color: color,
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: AppSizes.spacingMd),
-          Text(
-            'سيتم إضافة لوحة تحكم التغذية الكاملة، تتبع الوجبات، تحليل الطعام بالذكاء الاصطناعي، الوصفات الصحية، وإدارة الأهداف في الإصدارات القادمة.',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-              height: 1.6,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: AppSizes.spacingXl),
-          AppButton(
-            variant: AppButtonVariant.primary,
-            label: 'تسجيل الخروج',
-            onPressed: () => _handleSignOut(context),
-            fullWidth: false,
-            leadingIcon: Icon(Icons.logout, size: AppSizes.iconSm, color: AppColors.white),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildBottomNavigationBar(BuildContext context) {
-    return NavigationBar(
-      selectedIndex: 0,
-      onDestinationSelected: (index) {},
-      destinations: const [
-        NavigationDestination(
-          icon: Icon(Icons.home_outlined),
-          selectedIcon: Icon(Icons.home),
-          label: 'الرئيسية',
+class _ScannerCentralButton extends StatelessWidget {
+  const _ScannerCentralButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 52,
+        height: 52,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: AppColors.primary,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.35),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
-        NavigationDestination(
-          icon: Icon(Icons.camera_alt_outlined),
-          selectedIcon: Icon(Icons.camera_alt),
-          label: 'تحليل',
+        child: const Icon(
+          Icons.camera_alt_rounded,
+          color: Colors.white,
+          size: 26,
         ),
-        NavigationDestination(
-          icon: Icon(Icons.restaurant_menu_outlined),
-          selectedIcon: Icon(Icons.restaurant_menu),
-          label: 'الوجبات',
-        ),
-        NavigationDestination(
-          icon: Icon(Icons.person_outline),
-          selectedIcon: Icon(Icons.person),
-          label: 'الملف',
-        ),
-      ],
-      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-      height: 72,
-      backgroundColor: AppColors.white,
-      surfaceTintColor: Colors.transparent,
-      elevation: 8,
+      ),
     );
-  }
-
-  Future<void> _handleSignOut(BuildContext context) async {
-    // Clear auth state
-    // final prefs = await SharedPreferences.getInstance();
-    // await prefs.setBool('is_authenticated', false);
-
-    if (context.mounted) {
-      context.go(RouteNames.welcome);
-    }
   }
 }

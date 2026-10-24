@@ -1,156 +1,237 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:provider/provider.dart';
 
+import '../../../../../app/router/route_names.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/constants/app_sizes.dart';
-import '../../../../../core/constants/app_strings.dart';
-import '../../../../../core/constants/app_text_styles.dart';
-import '../../../../../core/widgets/app_loading.dart';
-import '../../../../../core/widgets/app_logo.dart';
-import '../viewmodels/splash_viewmodel.dart';
 
-class SplashView extends StatelessWidget {
+/// Splash Screen designed from NutriVision Stitch export (nutrivision_12)
+class SplashView extends StatefulWidget {
   const SplashView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<SplashViewModel>(
-      create: (_) => SplashViewModel(),
-      child: const _SplashViewContent(),
-    );
-  }
+  State<SplashView> createState() => _SplashViewState();
 }
 
-class _SplashViewContent extends StatefulWidget {
-  const _SplashViewContent();
-
-  @override
-  State<_SplashViewContent> createState() => _SplashViewContentState();
-}
-
-class _SplashViewContentState extends State<_SplashViewContent> with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _fadeAnimation;
+class _SplashViewState extends State<SplashView> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
   late Animation<double> _scaleAnimation;
+  late Animation<double> _fadeAnimation;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(
-      duration: AppSizes.durationSlow,
+    _controller = AnimationController(
       vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 0.95, end: 1.05).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.easeOut),
+    _fadeAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
-      CurvedAnimation(parent: _animationController, curve: Curves.elasticOut),
-    );
-
-    _animationController.forward();
-
-    // Initialize and navigate
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SplashViewModel>().initialize().then((_) {
-        _navigateToNextScreen();
-      });
+    _timer = Timer(const Duration(milliseconds: 2800), () {
+      if (mounted) {
+        context.go(RouteNames.welcome);
+      }
     });
-  }
-
-  Future<void> _navigateToNextScreen() async {
-    if (!mounted) return;
-
-    final viewModel = context.read<SplashViewModel>();
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    if (!mounted) return;
-
-    final nextRoute = viewModel.getNextRoute();
-    context.go(nextRoute);
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    _timer?.cancel();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.surfaceLight,
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.surfaceLight,
-              AppColors.warmCream,
-              AppColors.white,
-            ],
-            stops: const [0.0, 0.5, 1.0],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: FadeTransition(
-              opacity: _fadeAnimation,
-              child: ScaleTransition(
-                scale: _scaleAnimation,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Animated Logo
-                    AppLogoAnimated(size: AppSizes.logoLg),
-                    SizedBox(height: AppSizes.spacing3xl),
-
-                    // App tagline
-                    Text(
-                      AppStrings.appTagline,
-                      style: AppTextStyles.subtitleWhite.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: AppSizes.spacing4xl),
-
-                    // Loading indicator
-                    AppLoading(
-                      size: AppSizes.iconXl,
-                      color: AppColors.primary,
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                    ),
-                    SizedBox(height: AppSizes.spacingLg),
-
-                    // Loading text
-                    Text(
-                      AppStrings.splashLoading,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    SizedBox(height: AppSizes.spacing4xl),
-
-                    // Version
-                    Text(
-                      AppStrings.splashVersion,
-                      style: AppTextStyles.captionWhite.copyWith(
-                        color: AppColors.textSecondary.withValues(alpha: 0.5),
-                      ),
-                    ),
-                  ],
-                ),
+      backgroundColor: AppColors.primaryDark,
+      body: Stack(
+        children: [
+          // Background ambient blurs
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 280,
+              height: 280,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.teal.withValues(alpha: 0.15),
               ),
             ),
           ),
+          Positioned(
+            bottom: -100,
+            left: -100,
+            child: Container(
+              width: 280,
+              height: 280,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withValues(alpha: 0.25),
+              ),
+            ),
+          ),
+
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Top Pill Badge
+                  const _TopBadgePill(),
+
+                  // Central Brand & Logo Area
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ScaleTransition(
+                        scale: _scaleAnimation,
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: const _PulsingLogoWidget(),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'NutriVision',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 38,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.onPrimary,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'تغذيتك الذكية بلمسة عربية',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.softMint,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Bottom Loading Status
+                  const _BottomLoadingSection(),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TopBadgePill extends StatelessWidget {
+  const _TopBadgePill();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(9999),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.2),
+          width: 1,
         ),
       ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.eco, size: 16, color: AppColors.softMint),
+          SizedBox(width: 8),
+          Text(
+            'طبيعي 100% • ذكي',
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.onPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PulsingLogoWidget extends StatelessWidget {
+  const _PulsingLogoWidget();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 104,
+      height: 104,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: AppColors.surfaceWhite,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 30,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: const Center(
+        child: Icon(
+          Icons.restaurant,
+          size: 54,
+          color: AppColors.primary,
+        ),
+      ),
+    );
+  }
+}
+
+class _BottomLoadingSection extends StatelessWidget {
+  const _BottomLoadingSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          width: 140,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(9999),
+            child: const LinearProgressIndicator(
+              minHeight: 4,
+              backgroundColor: Color(0x33FFFFFF),
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.softMint),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        const Text(
+          'جاري تحضير خطتك الصحية...',
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 13,
+            color: Color(0xCCFFFFFF),
+          ),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 }

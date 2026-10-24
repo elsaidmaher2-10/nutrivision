@@ -3,419 +3,448 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../app/router/route_names.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../core/constants/app_sizes.dart';
-import '../../../../../core/constants/app_strings.dart';
-import '../../../../../core/constants/app_text_styles.dart';
-import '../../../../../core/widgets/app_button.dart';
-import '../../../../../core/widgets/app_scaffold.dart';
+import '../../../../../core/widgets/nutri_card.dart';
 
+/// Welcome / Landing screen designed from NutriVision Stitch export (nutrivision_11)
 class WelcomeView extends StatelessWidget {
   const WelcomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return AppAuthScaffold(
-      backgroundColor: AppColors.surfaceLight,
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Hero illustration area
-          _buildHeroSection(context),
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Hero Visual Card
+              const _WelcomeHeroCard(),
 
-          SizedBox(height: AppSizes.spacing3xl),
+              const SizedBox(height: 28),
 
-          // Text content
-          _buildTextContent(context),
+              // Title and Description
+              const _WelcomeHeaderSection(),
 
-          SizedBox(height: AppSizes.spacing2xl),
+              const SizedBox(height: 28),
 
-          // Feature highlights
-          _buildFeatureHighlights(context),
+              // 3 Features Grid
+              const _WelcomeFeatureGrid(),
 
-          SizedBox(height: AppSizes.spacing3xl),
+              const SizedBox(height: 36),
 
-          // Action buttons
-          _buildActionButtons(context),
+              // Action Buttons
+              _WelcomeActionButtons(
+                onCreateAccount: () => context.push(RouteNames.register),
+                onLogin: () => context.push(RouteNames.login),
+              ),
 
-          SizedBox(height: AppSizes.spacingLg),
+              const SizedBox(height: 16),
 
-          // Terms and conditions
-          _buildTermsFooter(context),
-        ],
+              // Terms & Privacy Note
+              const _TermsPrivacyFooter(),
+            ],
+          ),
+        ),
       ),
     );
   }
+}
 
-  Widget _buildHeroSection(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 390 / 256,
+class _WelcomeHeroCard extends StatelessWidget {
+  const _WelcomeHeroCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 240,
+      decoration: BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.circular(24.0),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF21865B),
+            Color(0xFF15563D),
+          ],
+        ),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x1F21865B),
+            blurRadius: 24,
+            offset: Offset(0, 8),
+          ),
+        ],
+      ),
       child: Stack(
         children: [
-          // Background illustration placeholder
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  AppColors.softMint,
-                  AppColors.surfaceLight,
-                  AppColors.warmCream,
+          // Background ambient circles
+          Positioned(
+            top: -40,
+            left: -40,
+            child: Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.08),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -30,
+            right: -30,
+            child: Container(
+              width: 160,
+              height: 160,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.teal.withValues(alpha: 0.15),
+              ),
+            ),
+          ),
+
+          // Central Visual Icon
+          const Center(
+            child: Icon(
+              Icons.eco_rounded,
+              size: 96,
+              color: Color(0x2EFFFFFF),
+            ),
+          ),
+
+          // Top Badge
+          Positioned(
+            top: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(9999),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.verified, size: 16, color: AppColors.secondaryContainer),
+                  SizedBox(width: 6),
+                  Text(
+                    'تغذية ذكية 100%',
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
                 ],
               ),
-              borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.06),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
-            child: Stack(
-              children: [
-                // Decorative circles
-                Positioned(
-                  top: -80,
-                  right: -80,
-                  child: Container(
-                    width: 180,
-                    height: 180,
+          ),
+
+          // Bottom Interactive Macro Pill
+          Positioned(
+            bottom: 16,
+            left: 16,
+            right: 16,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceWhite.withValues(alpha: 0.95),
+                borderRadius: BorderRadius.circular(16.0),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Color(0x1F000000),
+                    blurRadius: 16,
+                    offset: Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                      color: AppColors.softMint,
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt_rounded,
+                      color: AppColors.primary,
+                      size: 22,
                     ),
                   ),
-                ),
-                Positioned(
-                  bottom: -100,
-                  left: -100,
-                  child: Container(
-                    width: 220,
-                    height: 220,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.teal.withValues(alpha: 0.1),
-                    ),
-                  ),
-                ),
-                // Gradient scrim
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        AppColors.surfaceLight.withValues(alpha: 0.9),
-                        AppColors.surfaceLight.withValues(alpha: 0.2),
-                        AppColors.surfaceLight.withValues(alpha: 0.0),
-                        AppColors.surfaceLight.withValues(alpha: 0.9),
-                      ],
-                      stops: const [0.0, 0.3, 0.6, 1.0],
-                    ),
-                  ),
-                ),
-                // Floating badge
-                Positioned(
-                  top: AppSizes.spacingLg,
-                  right: AppSizes.spacingLg,
-                  child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: AppSizes.spacingMd,
-                      vertical: AppSizes.spacingXs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceLight.withValues(alpha: 0.9),
-                      borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          AppStrings.welcomeBadge,
-                          style: AppTextStyles.badgeText.copyWith(
-                            color: AppColors.textPrimary,
+                          'سعراتك محسوبة بدقة',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.onSurface,
                           ),
                         ),
-                        SizedBox(width: AppSizes.spacingXs),
-                        Icon(
-                          Icons.verified,
-                          size: AppSizes.iconXs,
-                          color: AppColors.primary,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                // Floating macro pill
-                Positioned(
-                  bottom: AppSizes.spacingLg,
-                  left: AppSizes.spacingLg,
-                  right: AppSizes.spacingLg,
-                  child: Container(
-                    padding: EdgeInsets.all(AppSizes.spacingMd),
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceLight.withValues(alpha: 0.95),
-                      borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: AppColors.accentTeal,
-                            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.local_fire_department,
-                              color: AppColors.deepGreen,
-                              size: AppSizes.iconMd,
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: AppSizes.spacingMd),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                AppStrings.welcomeFloatingTitle,
-                                style: AppTextStyles.titleMedium.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              Text(
-                                AppStrings.welcomeFloatingSubtitle,
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: AppColors.overlayGreen.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.arrow_forward_ios,
-                              color: AppColors.primary,
-                              size: AppSizes.iconSm,
-                            ),
+                        Text(
+                          'حلل طبقك الآن بكاميرا هاتفك',
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ],
+                  Container(
+                    width: 32,
+                    height: 32,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.softMint,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildTextContent(BuildContext context) {
-    return Padding(
-      padding: AppSizes.paddingHorizontalMd,
-      child: Column(
-        children: [
-          Text(
-            AppStrings.welcomeTitle,
-            style: AppTextStyles.heading1.copyWith(
-              color: AppColors.textPrimary,
-            ),
-            textAlign: TextAlign.center,
+class _WelcomeHeaderSection extends StatelessWidget {
+  const _WelcomeHeaderSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        Text(
+          'رحلتك الصحية تبدأ هنا',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 28,
+            fontWeight: FontWeight.w800,
+            color: AppColors.onSurface,
+            height: 1.3,
           ),
-          SizedBox(height: AppSizes.spacingLg),
-          Text(
-            AppStrings.welcomeDescription,
-            style: AppTextStyles.subtitle.copyWith(
-              color: AppColors.textSecondary,
-              height: 1.6,
-            ),
-            textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 10),
+        Text(
+          'اكتشف تحليلاً دقيقاً لوجباتك، تتبع سعراتك بكل سهولة، واحصل على بدائل صحية ذكية تناسب أهدافك.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 14,
+            fontWeight: FontWeight.w400,
+            color: AppColors.textSecondary,
+            height: 1.6,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
+}
 
-  Widget _buildFeatureHighlights(BuildContext context) {
-    return Padding(
-      padding: AppSizes.paddingHorizontalMd,
-      child: Row(
-        children: [
-          _buildFeatureItem(
-            context,
-            icon: Icons.restaurant_menu,
+class _WelcomeFeatureGrid extends StatelessWidget {
+  const _WelcomeFeatureGrid();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        Expanded(
+          child: _FeatureTile(
+            icon: Icons.photo_camera_outlined,
             iconColor: AppColors.primary,
-            backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-            title: 'بدائل صحية',
-            subtitle: 'أطباق محلية',
-          ),
-          SizedBox(width: AppSizes.spacingMd),
-          _buildFeatureItem(
-            context,
-            icon: Icons.local_fire_department,
-            iconColor: AppColors.teal,
-            backgroundColor: AppColors.teal.withValues(alpha: 0.1),
-            title: 'تتبع السعرات',
-            subtitle: 'متابعة يومية',
-          ),
-          SizedBox(width: AppSizes.spacingMd),
-          _buildFeatureItem(
-            context,
-            icon: Icons.camera_alt,
-            iconColor: AppColors.orange,
-            backgroundColor: AppColors.orange.withValues(alpha: 0.1),
+            bgColor: AppColors.softMint,
             title: 'تصوير الوجبة',
             subtitle: 'تحليل فوري',
           ),
-        ],
-      ),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          child: _FeatureTile(
+            icon: Icons.insights_outlined,
+            iconColor: AppColors.teal,
+            bgColor: Color(0xFFE0F7F4),
+            title: 'تتبع السعرات',
+            subtitle: 'متابعة يومية',
+          ),
+        ),
+        SizedBox(width: 12),
+        Expanded(
+          child: _FeatureTile(
+            icon: Icons.restaurant_menu_outlined,
+            iconColor: AppColors.orange,
+            bgColor: Color(0xFFFFF3E0),
+            title: 'بدائل صحية',
+            subtitle: 'أطباق محلية',
+          ),
+        ),
+      ],
     );
   }
+}
 
-  Widget _buildFeatureItem(
-    BuildContext context, {
-    required IconData icon,
-    required Color iconColor,
-    required Color backgroundColor,
-    required String title,
-    required String subtitle,
-  }) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.all(AppSizes.spacingMd),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceVariant,
-          borderRadius: BorderRadius.circular(AppSizes.radiusLg),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: backgroundColor,
-                borderRadius: BorderRadius.circular(AppSizes.radiusFull),
-              ),
-              child: Center(
-                child: Icon(icon, color: iconColor, size: AppSizes.iconLg),
-              ),
-            ),
-            SizedBox(height: AppSizes.spacingMd),
-            Text(
-              title,
-              style: AppTextStyles.featureTitle.copyWith(
-                color: AppColors.textPrimary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: AppSizes.spacingXs),
-            Text(
-              subtitle,
-              style: AppTextStyles.featureSubtitle.copyWith(
-                color: AppColors.textSecondary,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+class _FeatureTile extends StatelessWidget {
+  const _FeatureTile({
+    required this.icon,
+    required this.iconColor,
+    required this.bgColor,
+    required this.title,
+    required this.subtitle,
+  });
 
-  Widget _buildActionButtons(BuildContext context) {
-    return Padding(
-      padding: AppSizes.paddingHorizontalMd,
+  final IconData icon;
+  final Color iconColor;
+  final Color bgColor;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return NutriCard(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      borderRadius: BorderRadius.circular(16),
       child: Column(
         children: [
-          // Primary button - Create Account
-          AppButton(
-            variant: AppButtonVariant.primary,
-            label: AppStrings.welcomeCreateAccount,
-            onPressed: () => context.push(RouteNames.register),
-            trailingIcon: Icon(
-              Icons.arrow_forward_ios,
-              size: AppSizes.iconSm,
-              color: AppColors.white,
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: bgColor,
+            ),
+            child: Icon(icon, color: iconColor, size: 22),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13,
+              fontWeight: FontWeight.bold,
+              color: AppColors.onSurface,
             ),
           ),
-
-          SizedBox(height: AppSizes.spacingLg),
-
-          // Secondary button - Login
-          AppButton(
-            variant: AppButtonVariant.secondary,
-            label: AppStrings.welcomeLogin,
-            onPressed: () => context.push(RouteNames.login),
-            trailingIcon: Icon(
-              Icons.arrow_forward_ios,
-              size: AppSizes.iconSm,
-              color: AppColors.primaryDark,
+          const SizedBox(height: 4),
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 11,
+              color: AppColors.textSecondary,
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildTermsFooter(BuildContext context) {
-    return Padding(
-      padding: AppSizes.paddingHorizontalMd,
-      child: RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          style: AppTextStyles.caption.copyWith(
-            color: AppColors.textMuted,
-            height: 1.5,
+class _WelcomeActionButtons extends StatelessWidget {
+  const _WelcomeActionButtons({
+    required this.onCreateAccount,
+    required this.onLogin,
+  });
+
+  final VoidCallback onCreateAccount;
+  final VoidCallback onLogin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SizedBox(
+          height: 56,
+          child: ElevatedButton.icon(
+            onPressed: onCreateAccount,
+            icon: const Icon(Icons.person_add_alt_1_rounded, size: 20),
+            label: const Text(
+              'إنشاء حساب جديد',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: AppColors.onPrimary,
+              elevation: 4,
+              shadowColor: AppColors.primary.withValues(alpha: 0.3),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+            ),
           ),
-          children: [
-            TextSpan(text: AppStrings.welcomeTermsPrefix),
-            TextSpan(
-              text: AppStrings.welcomePrivacy,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.primaryDark,
-                decoration: TextDecoration.underline,
-                decorationColor: AppColors.primaryDark,
-              ),
-            ),
-            TextSpan(text: AppStrings.welcomeAnd),
-            TextSpan(
-              text: AppStrings.welcomeTerms,
-              style: AppTextStyles.caption.copyWith(
-                color: AppColors.primaryDark,
-                decoration: TextDecoration.underline,
-                decorationColor: AppColors.primaryDark,
-              ),
-            ),
-          ],
         ),
+        const SizedBox(height: 14),
+        SizedBox(
+          height: 56,
+          child: OutlinedButton.icon(
+            onPressed: onLogin,
+            icon: const Icon(Icons.login_rounded, size: 20, color: AppColors.primary),
+            label: const Text(
+              'تسجيل الدخول',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              backgroundColor: AppColors.surfaceWhite,
+              side: const BorderSide(color: AppColors.primary, width: 1.5),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.0),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TermsPrivacyFooter extends StatelessWidget {
+  const _TermsPrivacyFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text(
+      'بالتضامن مع أهدافك، فإنك توافق على شروط الاستخدام وسياسة الخصوصية',
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontFamily: 'Cairo',
+        fontSize: 11,
+        color: AppColors.textSecondary,
+        height: 1.5,
       ),
     );
   }
