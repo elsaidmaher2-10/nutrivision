@@ -1,43 +1,34 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
-/// Elevated card with organic green ambient shadow from NutriVision DESIGN.md
 class NutriCard extends StatelessWidget {
   const NutriCard({
     required this.child,
     super.key,
     this.padding,
-    this.margin,
+    this.color,
     this.borderRadius,
-    this.backgroundColor = AppColors.surfaceWhite,
-    this.borderColor,
     this.onTap,
+    this.margin,
   });
 
   final Widget child;
   final EdgeInsetsGeometry? padding;
-  final EdgeInsetsGeometry? margin;
-  final BorderRadiusGeometry? borderRadius;
-  final Color backgroundColor;
-  final Color? borderColor;
+  final Color? color;
+  final double? borderRadius;
   final VoidCallback? onTap;
+  final EdgeInsetsGeometry? margin;
 
   @override
   Widget build(BuildContext context) {
-    final effectiveBorderRadius = borderRadius ?? BorderRadius.circular(16.0);
-
     return Container(
       margin: margin,
       decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: effectiveBorderRadius,
-        border: Border.all(
-          color: borderColor ?? AppColors.border.withValues(alpha: 0.5),
-          width: 1,
-        ),
+        color: color ?? AppColors.surfaceWhite,
+        borderRadius: BorderRadius.circular(borderRadius ?? 16),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x0F21865B), // 0 4px 20px rgba(33, 134, 91, 0.06)
+            color: Color(0x0F21865B),
             blurRadius: 20,
             offset: Offset(0, 4),
           ),
@@ -45,12 +36,12 @@ class NutriCard extends StatelessWidget {
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: effectiveBorderRadius,
+        borderRadius: BorderRadius.circular(borderRadius ?? 16),
         child: InkWell(
-          borderRadius: effectiveBorderRadius as BorderRadius?,
           onTap: onTap,
+          borderRadius: BorderRadius.circular(borderRadius ?? 16),
           child: Padding(
-            padding: padding ?? const EdgeInsets.all(16.0),
+            padding: padding ?? const EdgeInsets.all(16),
             child: child,
           ),
         ),

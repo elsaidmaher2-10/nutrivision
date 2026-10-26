@@ -1,87 +1,38 @@
 import 'package:flutter/material.dart';
-
-import '../../../../../core/constants/app_sizes.dart';
-import '../../../../../core/constants/app_strings.dart';
-import '../../../../../core/widgets/app_button.dart';
-import '../viewmodels/onboarding_viewmodel.dart';
+import '../../../../../core/widgets/nutri_button.dart';
 
 class OnboardingNavigation extends StatelessWidget {
   const OnboardingNavigation({
+    required this.isLastPage,
+    required this.onNext,
+    required this.onSkip,
     super.key,
-    required this.viewModel,
-    this.onNext,
-    this.onBack,
-    this.onGetStarted,
   });
 
-  final OnboardingViewModel viewModel;
-  final VoidCallback? onNext;
-  final VoidCallback? onBack;
-  final VoidCallback? onGetStarted;
+  final bool isLastPage;
+  final VoidCallback onNext;
+  final VoidCallback onSkip;
 
   @override
   Widget build(BuildContext context) {
-    final isLastPage = viewModel.isLastPage;
-
     return Padding(
-      padding: EdgeInsetsDirectional.only(
-        start: AppSizes.screenMargin,
-        end: AppSizes.screenMargin,
-        top: AppSizes.spacingLg,
-        bottom: AppSizes.spacingXl,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Column(
         children: [
-          // Navigation buttons
-          Row(
-            children: [
-              // Back button (only on non-first pages)
-              if (viewModel.currentPage > 0)
-                Expanded(
-                  child: AppButton(
-                    variant: AppButtonVariant.outlined,
-                    label: AppStrings.onboardingBack,
-                    onPressed: onBack ?? () => viewModel.previousPage(),
-                    leadingIcon: Icon(
-                      Icons.arrow_back_ios_new,
-                      size: AppSizes.iconSm,
-                    ),
-                    fullWidth: true,
-                  ),
-                )
-              else
-                const Expanded(child: SizedBox.shrink()),
-
-              // Next / Get Started button
-              if (!isLastPage)
-                Expanded(
-                  flex: viewModel.currentPage > 0 ? 1 : 3,
-                  child: AppButton(
-                    variant: AppButtonVariant.primary,
-                    label: AppStrings.onboardingNext,
-                    onPressed: onNext ?? viewModel.nextPage,
-                    trailingIcon: Icon(
-                      Icons.arrow_forward_ios,
-                      size: AppSizes.iconSm,
-                    ),
-                    fullWidth: true,
-                  ),
-                )
-              else
-                Expanded(
-                  child: AppButton(
-                    variant: AppButtonVariant.primary,
-                    label: AppStrings.onboardingGetStarted,
-                    onPressed: onGetStarted ?? viewModel.completeOnboarding,
-                    trailingIcon: Icon(
-                      Icons.arrow_forward_ios,
-                      size: AppSizes.iconSm,
-                    ),
-                    fullWidth: true,
-                  ),
-                ),
-            ],
+          NutriButton(
+            label: isLastPage ? 'ابدأ الآن' : 'التالي',
+            onPressed: onNext,
           ),
+          if (!isLastPage) ...[
+            const SizedBox(height: 8),
+            TextButton(
+              onPressed: onSkip,
+              child: const Text(
+                'تخطي',
+                style: TextStyle(fontFamily: 'Cairo', color: Colors.grey),
+              ),
+            ),
+          ],
         ],
       ),
     );
