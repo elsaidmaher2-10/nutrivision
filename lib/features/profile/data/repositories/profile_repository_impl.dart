@@ -14,7 +14,7 @@ class ProfileRepositoryImpl implements ProfileRepository {
   Future<Either<Failure, UserProfile>> getProfile(String userId) async {
     try {
       final doc = await _firestore.getDoc(_userDoc(userId));
-      if (!doc.exists || doc.data() == null) {
+      if (doc == null || !doc.exists || doc.data() == null) {
         return Right(UserProfile(uid: userId, name: '', email: ''));
       }
       return Right(UserProfile.fromMap(userId, doc.data()!));

@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -21,14 +22,21 @@ import '../../features/profile/presentation/cubit/profile_cubit.dart';
 final GetIt getIt = GetIt.instance;
 
 Future<void> setupLocator() async {
-  getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
-  getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
-  getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
+  FirebaseAuth? auth;
+  FirebaseFirestore? firestore;
+  FirebaseStorage? storage;
+  try {
+    if (Firebase.apps.isNotEmpty) {
+      auth = FirebaseAuth.instance;
+      firestore = FirebaseFirestore.instance;
+      storage = FirebaseStorage.instance;
+    }
+  } catch (_) {}
 
-  getIt.registerLazySingleton<AuthService>(() => AuthService(getIt<FirebaseAuth>()));
-  getIt.registerLazySingleton<FirestoreService>(() => FirestoreService(getIt<FirebaseFirestore>()));
-  getIt.registerLazySingleton<StorageService>(() => StorageService(getIt<FirebaseStorage>()));
-  getIt.registerLazySingleton<UserSessionService>(() => UserSessionService(getIt<FirebaseAuth>()));
+  getIt.registerLazySingleton<AuthService>(() => AuthService(auth));
+  getIt.registerLazySingleton<FirestoreService>(() => FirestoreService(firestore));
+  getIt.registerLazySingleton<StorageService>(() => StorageService(storage));
+  getIt.registerLazySingleton<UserSessionService>(() => UserSessionService(auth));
 
   getIt.registerLazySingleton<AuthRepository>(() => AuthRepositoryImpl(getIt<AuthService>()));
   getIt.registerLazySingleton<NutritionRepository>(() => NutritionRepositoryImpl(getIt<FirestoreService>()));

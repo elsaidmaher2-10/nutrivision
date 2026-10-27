@@ -25,10 +25,11 @@ class NutritionRepositoryImpl implements NutritionRepository {
     DateTime date,
   ) =>
       _guard(() async {
+        final col = _firestore.collection(_mealsCol(userId));
+        if (col == null) return <MealEntry>[];
         final start = DateTime(date.year, date.month, date.day);
         final end = start.add(const Duration(days: 1));
-        final snap = await _firestore
-            .collection(_mealsCol(userId))
+        final snap = await col
             .where('loggedAt',
                 isGreaterThanOrEqualTo: start.toIso8601String(),
                 isLessThan: end.toIso8601String())
