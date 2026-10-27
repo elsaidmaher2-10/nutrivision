@@ -1,17 +1,34 @@
-# nutrivision
+# NutriVision 🥗
 
-A new Flutter project.
+NutriVision is an AI-powered nutrition and wellness mobile application
+that helps users manage their diet and make healthier food choices.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- 🍽️ Meal description and nutrition analysis
+- 🤖 AI-powered nutrition recommendations
+- 🥗 Healthy meal alternatives
+- 🔍 Healthy snack alternatives
+- 📊 Nutrition history and statistics
+- ☁️ Real-time meal synchronization
+- 🔐 Secure user authentication
 
-A few resources to get you started if this is your first Flutter project:
+## Technologies
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Flutter & Dart
+- Dio
+- Firebase / Cloud Firestore
+- REST APIs
+- AI / Prompt Engineering
+- BLoC / Cubit
+- Unit Testing
+- Widget Testing
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Architecture
+
+The project follows a clean and scalable architecture to make
+collaboration easier and keep the code maintainable.
+
+## Team
+
+NutriVision is developed collaboratively by a team of six developers.
